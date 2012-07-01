@@ -1,11 +1,41 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <link rel="alternate"
+              type="application/rss+xml"
+              title="RSS 2.0"
+              href="/feed/}" />
+        <link rel="alternate"
+              type="application/atom+xml"
+              title="Atom 1.0"
+              href="/feed/" />
+        <title>CR: Daily prog wisdom</title>
+        <style>
+            blockquote { background-color: #f6f6f6; padding: 15px; font-size: bigger;  border-radius: 15px; }
+            footer { font-size: smaller; }
+            h1 { font-size: medium; padding: 0; margin: 0; }
+            #container { margin: auto; width: 700px; }
+        </style>
+    </head>
     <body>
-        <h1>carriagereturn</h1>
+        <div id="container">
+            <h1><a href="/">carriagereturn</a></h1>
 
-        <h2>{{ .Entry.Author }}</h2>
-        <h3>{{ .Entry.Tags }}</h3>
-        <blockquote>
-            <p>{{ .Entry.Content }}</p>
-        </blockquote>
+            <h2>{{ .Entry.Tags }}</h2>
+            <blockquote>
+                {{ .Entry.Content }}
+            </blockquote>
+            {{ if .Entry.Author }}
+                <p>Inspiration: {{ .Entry.Author }}<p>
+            {{ end }}
+
+            <footer>
+            A daily dose of software engineering wisdom - inspiring, thought provoking, and sometimes just plain dangerous.
+            GPL <a href="http://github.com/grahamking/carriagereturn">source code</a>.
+            By <a href="http://www.darkcoding.net">darkcoding</a>.
+            <p>Put this url in your feed reader (RSS / Atom).</p>
+            </footer>
+        </div>
     </body>
 </html>
