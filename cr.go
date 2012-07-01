@@ -22,6 +22,7 @@ import (
     "text/template"
     _ "pq"
     "database/sql"
+    "math/rand"
 )
 
 const (
@@ -30,6 +31,7 @@ const (
 )
 
 func main() {
+
     fmt.Println("carriagereturn listening on port", PORT)
     http.HandleFunc("/", handler)
     log.Fatal(http.ListenAndServe(":" + PORT, nil))
@@ -61,22 +63,47 @@ type Entry struct {
 
 func LoadEntry() *Entry {
 
+    allids := ids()
+    choice := rand.Intn(len(allids))
+    fmt.Println(choice)
+
     db, dberr := sql.Open("postgres", "user=graham dbname=carriagereturn")
     if dberr != nil {
         log.Fatal("Error connecting. ", dberr)
     }
     defer db.Close()
 
-    rows, qerr := db.Query(`SELECT id, content, author, tags
+    rows, qerr := db.Query(`SELECT content, author, tags
                             FROM cr_entry
-                            LIMIT 1`)
+                            WHERE id = $1`,
+                            allids[choice])
     if qerr != nil {
         log.Fatal("Error reading from cr_entry in db", qerr)
     }
 
-    entry := Entry{}
+    entry := Entry{Id:allids[choice]}
     rows.Next()
-    rows.Scan(&entry.Id, &entry.Content, &entry.Author, &entry.Tags)
+    rows.Scan(&entry.Content, &entry.Author, &entry.Tags)
 
     return &entry
+}
+
+func ids() []int {
+
+    db, dberr := sql.Open("postgres", "user=graham dbname=carriagereturn")
+    if dberr != nil {
+        log.Fatal("Error connecting. ", dberr)
+    }
+    defer db.Close()
+
+    rows, _ := db.Query("SELECT id FROM cr_entry")
+    ids := make([]int, 0)
+    var id int
+
+    for rows.Next() {
+        rows.Scan(&id)
+        ids = append(ids, id)
+    }
+
+    return ids
 }
