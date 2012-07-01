@@ -23,6 +23,8 @@ import (
     _ "pq"
     "database/sql"
     "math/rand"
+    "strings"
+    "strconv"
 )
 
 const (
@@ -30,9 +32,16 @@ const (
     HTML = "/home/graham/Projects/Go/src/carriagereturn/index.html"
 )
 
+var (
+    allids []int
+)
+
 func main() {
 
+    allids = ids()
+
     fmt.Println("carriagereturn listening on port", PORT)
+
     http.HandleFunc("/", handler)
     log.Fatal(http.ListenAndServe(":" + PORT, nil))
 }
@@ -43,15 +52,30 @@ type Context struct {
 
 func handler(response http.ResponseWriter, request *http.Request) {
 
-    tmpl, err := template.ParseFiles(HTML)
-    if err != nil {
-        log.Fatal(err)
+    path := strings.Trim(request.URL.Path, "/")
+    entryId, converr := strconv.Atoi(path)
+    if converr != nil {
+        redirectToEntry(response, request)
+        return
     }
 
-    entry := LoadEntry()
+    entry := LoadEntry(entryId)
+
+    tmpl, terr := template.ParseFiles(HTML)
+    if terr != nil {
+        log.Fatal(terr)
+    }
 
     context := Context{Entry:entry}
     tmpl.Execute(response, context)
+}
+
+// No entryId in URL, pick one at random and redirect to it
+func redirectToEntry(response http.ResponseWriter, request *http.Request) {
+
+    choice := rand.Intn(len(allids))
+    entryId := allids[choice]
+    http.Redirect(response, request, "/" + strconv.Itoa(entryId) + "/", 302)
 }
 
 type Entry struct {
@@ -61,11 +85,7 @@ type Entry struct {
     Tags string
 }
 
-func LoadEntry() *Entry {
-
-    allids := ids()
-    choice := rand.Intn(len(allids))
-    fmt.Println(choice)
+func LoadEntry(entryId int) *Entry {
 
     db, dberr := sql.Open("postgres", "user=graham dbname=carriagereturn")
     if dberr != nil {
@@ -76,12 +96,12 @@ func LoadEntry() *Entry {
     rows, qerr := db.Query(`SELECT content, author, tags
                             FROM cr_entry
                             WHERE id = $1`,
-                            allids[choice])
+                            entryId)
     if qerr != nil {
         log.Fatal("Error reading from cr_entry in db", qerr)
     }
 
-    entry := Entry{Id:allids[choice]}
+    entry := Entry{Id:entryId}
     rows.Next()
     rows.Scan(&entry.Content, &entry.Author, &entry.Tags)
 
