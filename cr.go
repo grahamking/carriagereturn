@@ -25,6 +25,7 @@ import (
     "math/rand"
     "strings"
     "strconv"
+    "time"
 )
 
 const (
@@ -72,6 +73,16 @@ func handler(response http.ResponseWriter, request *http.Request) {
 
 // No entryId in URL, pick one at random and redirect to it
 func redirectToEntry(response http.ResponseWriter, request *http.Request) {
+
+    // Seed random generator to today, so all requests in same day get same entry
+    now := time.Now()
+    mid := time.Date(
+        now.Year(),
+        now.Month(),
+        now.Day(),
+        12, 0, 0, 0,
+        now.Location())
+    rand.Seed(mid.Unix())
 
     choice := rand.Intn(len(allids))
     entryId := allids[choice]
