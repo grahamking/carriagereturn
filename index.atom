@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<feed xmlns='http://www.w3.org/2005/Atom'
+      xml:base='http://carriagereturn.org/feed/'
+      xml:lang='en-us'>
+ <title>carriagereturn.org</title>
+ <id>http://carriagereturn.org/</id>
+ <link href='./' />
+ <link rel='self' href='' />
+ <author><name>Graham King</name></author>
+ <subtitle>A daily dose of software engineering wisdom - inspiring, thought provoking, and sometimes just plain dangerous.</subtitle>
+ <rights>Creative-Commons Attribution Share-alike</rights>
+ <generator>Go</generator>
+
+<entry xml:base="/{{ .Entry.Id }}/">
+    <title>{{ .Entry.Tags }}</title>
+    <id>http://carriagereturn.org/{{ .Entry.Id }}/</id>
+    <content type="html">{{ .Entry.Content }}</content>
+</entry>
+
+</feed>

@@ -30,7 +30,9 @@ import (
 
 const (
     PORT = "8081"
-    HTML = "/home/graham/Projects/Go/src/carriagereturn/index.html"
+    ROOT = "/home/graham/Projects/Go/src/carriagereturn/"
+    HTML = ROOT + "index.html"
+    ATOM = ROOT + "index.atom"
 )
 
 var (
@@ -54,15 +56,28 @@ type Context struct {
 func handler(response http.ResponseWriter, request *http.Request) {
 
     path := strings.Trim(request.URL.Path, "/")
+
+    if path == "feed" {
+        atomFeed(response)
+        return
+    }
+
+    // If no ID in path redirect to todays entry
     entryId, converr := strconv.Atoi(path)
     if converr != nil {
-        redirectToEntry(response, request)
+        http.Redirect(response, request, "/" + strconv.Itoa(todaysId()) + "/", 302)
         return
     }
 
     entry := LoadEntry(entryId)
+    outputTemplate(HTML, entry, response)
 
-    tmpl, terr := template.ParseFiles(HTML)
+}
+
+// Write out a template with given entry. Response is finished after this runs.
+func outputTemplate(tmplFilename string, entry *Entry, response http.ResponseWriter) {
+
+    tmpl, terr := template.ParseFiles(tmplFilename)
     if terr != nil {
         log.Fatal(terr)
     }
@@ -71,8 +86,15 @@ func handler(response http.ResponseWriter, request *http.Request) {
     tmpl.Execute(response, context)
 }
 
-// No entryId in URL, pick one at random and redirect to it
-func redirectToEntry(response http.ResponseWriter, request *http.Request) {
+// ATOM 1.0 feed
+func atomFeed(response http.ResponseWriter) {
+    response.Header().Add("Content-Type", "application/atom+xml")
+    entry := LoadEntry(todaysId())
+    outputTemplate(ATOM, entry, response)
+}
+
+// Id of the entry for today
+func todaysId() int {
 
     // Seed random generator to today, so all requests in same day get same entry
     now := time.Now()
@@ -86,7 +108,8 @@ func redirectToEntry(response http.ResponseWriter, request *http.Request) {
 
     choice := rand.Intn(len(allids))
     entryId := allids[choice]
-    http.Redirect(response, request, "/" + strconv.Itoa(entryId) + "/", 302)
+
+    return entryId
 }
 
 type Entry struct {
