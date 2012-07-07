@@ -29,8 +29,8 @@ import (
 )
 
 const (
-    PORT = "8081"
-    ROOT = "/home/graham/Projects/Go/src/carriagereturn/"
+    PORT = "8082"
+    ROOT = "/usr/local/carriagereturn/"
     HTML = ROOT + "index.html"
     ATOM = ROOT + "index.atom"
 )
