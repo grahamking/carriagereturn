@@ -121,7 +121,7 @@ type Entry struct {
 
 func LoadEntry(entryId int) *Entry {
 
-    db, dberr := sql.Open("postgres", "user=graham dbname=carriagereturn")
+    db, dberr := sql.Open("postgres", "user=www-data dbname=carriagereturn")
     if dberr != nil {
         log.Fatal("Error connecting. ", dberr)
     }
@@ -144,7 +144,7 @@ func LoadEntry(entryId int) *Entry {
 
 func ids() []int {
 
-    db, dberr := sql.Open("postgres", "user=graham dbname=carriagereturn")
+    db, dberr := sql.Open("postgres", "user=www-data dbname=carriagereturn")
     if dberr != nil {
         log.Fatal("Error connecting. ", dberr)
     }
