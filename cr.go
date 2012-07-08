@@ -23,7 +23,6 @@ import (
     _ "pq"
     "database/sql"
     "math/rand"
-    "strings"
     "strconv"
     "time"
 )
@@ -41,6 +40,10 @@ var (
 
 func main() {
 
+    AddRoute("^/feed/$", atomFeed)
+    AddRoute("^/(?P<entryId>\\d+)/$", entry)
+    AddRoute("^/$", index)
+
     allids = ids()
 
     fmt.Println("carriagereturn listening on port", PORT)
@@ -55,23 +58,33 @@ type Context struct {
 
 func handler(response http.ResponseWriter, request *http.Request) {
 
-    path := strings.Trim(request.URL.Path, "/")
-
-    if path == "feed" {
-        atomFeed(response)
+    route, args := FindRoute(request.URL.Path)
+    if route.Target == nil {
+        response.WriteHeader(http.StatusNotFound)
+        response.Write([]byte("Not Found"))
         return
     }
 
-    // If no ID in path redirect to todays entry
-    entryId, converr := strconv.Atoi(path)
-    if converr != nil {
-        http.Redirect(response, request, "/" + strconv.Itoa(todaysId()) + "/", 302)
-        return
-    }
+    route.Target(response, request, args)
+}
 
+// index - redirect to todays id
+func index(response http.ResponseWriter, request *http.Request, args map[string] string) {
+    http.Redirect(response, request, "/" + strconv.Itoa(todaysId()) + "/", 302)
+}
+
+// Specific entry
+func entry(response http.ResponseWriter, request *http.Request, args map[string] string) {
+    entryId, _ := strconv.Atoi(args["entryId"])
     entry := LoadEntry(entryId)
     outputTemplate(HTML, entry, response)
+}
 
+// ATOM 1.0 feed
+func atomFeed(response http.ResponseWriter, request *http.Request, args map[string] string) {
+    response.Header().Add("Content-Type", "application/atom+xml")
+    entry := LoadEntry(todaysId())
+    outputTemplate(ATOM, entry, response)
 }
 
 // Write out a template with given entry. Response is finished after this runs.
@@ -84,13 +97,6 @@ func outputTemplate(tmplFilename string, entry *Entry, response http.ResponseWri
 
     context := Context{Entry:entry}
     tmpl.Execute(response, context)
-}
-
-// ATOM 1.0 feed
-func atomFeed(response http.ResponseWriter) {
-    response.Header().Add("Content-Type", "application/atom+xml")
-    entry := LoadEntry(todaysId())
-    outputTemplate(ATOM, entry, response)
 }
 
 // Id of the entry for today
