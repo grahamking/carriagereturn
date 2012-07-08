@@ -25,6 +25,7 @@ import (
     "math/rand"
     "strconv"
     "time"
+    "github.com/grahamking/route"
 )
 
 const (
@@ -40,9 +41,9 @@ var (
 
 func main() {
 
-    AddRoute("^/feed/$", atomFeed)
-    AddRoute("^/(?P<entryId>\\d+)/$", entry)
-    AddRoute("^/$", index)
+    route.AddRoute("^/feed/$", atomFeed)
+    route.AddRoute("^/(?P<entryId>\\d+)/$", entry)
+    route.AddRoute("^/$", index)
 
     allids = ids()
 
@@ -58,7 +59,7 @@ type Context struct {
 
 func handler(response http.ResponseWriter, request *http.Request) {
 
-    route, args := FindRoute(request.URL.Path)
+    route, args := route.FindRoute(request.URL.Path)
     if route.Target == nil {
         response.WriteHeader(http.StatusNotFound)
         response.Write([]byte("Not Found"))
