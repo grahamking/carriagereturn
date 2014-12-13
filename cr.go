@@ -38,6 +38,7 @@ var (
 		"/usr/local/carriagereturn/",
 		"Root directory. Must contain index.html and index.atom",
 	)
+	dbhost = flag.String("h", "127.0.0.1", "Database host")
 
 	allids []int
 )
@@ -135,7 +136,7 @@ type Entry struct {
 
 func LoadEntry(entryId int) *Entry {
 
-	db, dberr := sql.Open("postgres", "user=www-data dbname=carriagereturn")
+	db, dberr := sql.Open("postgres", fmt.Sprintf("user=postgres dbname=carriagereturn sslmode=disable host=%s", *dbhost))
 	if dberr != nil {
 		log.Fatal("Error connecting. ", dberr)
 	}
@@ -158,7 +159,7 @@ func LoadEntry(entryId int) *Entry {
 
 func ids() []int {
 
-	db, dberr := sql.Open("postgres", "user=www-data dbname=carriagereturn")
+	db, dberr := sql.Open("postgres", fmt.Sprintf("user=postgres dbname=carriagereturn sslmode=disable host=%s", *dbhost))
 	if dberr != nil {
 		log.Fatal("Error connecting: ", dberr)
 	}
