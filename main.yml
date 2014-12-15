@@ -1,0 +1,21 @@
+---
+# ansible-playbook main.yml
+- name: Run carriagereturn on remote server
+  hosts: host2
+  sudo: True
+  tasks:
+      - name: Create postgres group
+        group: name=postgres
+      - name: Create postgres user
+        user: name=postgres group=postgres shell=/usr/sbin/nologin
+      - name: Create database data dir
+        file: >
+            name=/var/lib/postgresql/data
+            state=directory
+            owner=postgres
+            group=postgres
+            mode=755
+      - name: Start database
+        command: docker run --name=crdb -d --restart=always -v /var/lib/postgresql/data:/var/lib/postgresql/data grahamking/crdb
+      - name: Start carriagereturn container
+        command: docker run --name=carriagereturn -d --restart=always --link crdb:crdb -p 8082:8082 grahamking/carriagereturn
