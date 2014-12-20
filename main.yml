@@ -15,7 +15,11 @@
             owner=postgres
             group=postgres
             mode=755
-      - name: Start database
-        command: docker run --name=crdb -d --restart=always -v /var/lib/postgresql/data:/var/lib/postgresql/data grahamking/crdb
+      - name: Stop and remove database container
+        docker: name=crdb image=localhost:5000/crdb state=absent
+      - name: Start database container
+        command: docker run --name=crdb -d --restart=always -v /var/lib/postgresql/data:/var/lib/postgresql/data localhost:5000/crdb
+      - name: Stop and remove carriagereturn container
+        docker: name=carriagereturn image=localhost:5000/carriagereturn state=absent
       - name: Start carriagereturn container
-        command: docker run --name=carriagereturn -d --restart=always --link crdb:crdb -p 8082:8082 grahamking/carriagereturn
+        command: docker run --name=carriagereturn -d --restart=always --link crdb:crdb localhost:5000/carriagereturn

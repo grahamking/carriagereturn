@@ -1,5 +1,5 @@
-# docker build -t=grahamking/carriagereturn .
-# docker run --name=carriagereturn -d --link crdb:crdb -p 8082:8082 grahamking/carriagereturn
+# docker build -t=localhost:5000/carriagereturn .
+# docker run --name=carriagereturn -d --link crdb:crdb localhost:5000/carriagereturn
 FROM debian:stable
 MAINTAINER Graham King <graham@gkgk.org>
 RUN mkdir -p /opt/cr && chown www-data:www-data /opt/cr
