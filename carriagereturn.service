@@ -1,0 +1,18 @@
+[Unit]
+Description="carriagereturn"
+Requires=network-online.target
+After=network-online.target
+
+[Service]
+ExecStart=/usr/carriagereturn/cr -p 8082 -r /usr/carriagereturn
+WorkingDirectory=/usr/carriagereturn
+User=nobody
+Group=nobody
+ProtectSystem=full
+ProtectHome=read-only
+PrivateTmp=true
+PrivateDevices=true
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target
